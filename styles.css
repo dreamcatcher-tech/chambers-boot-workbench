@@ -263,14 +263,33 @@ select {
 .role-card { min-height: 98px; padding: 14px; border: 1px solid var(--line); background: #0a1625; }
 .role-card.gateway { border-color: rgba(77, 229, 213, .45); }
 .role-card.persistence { border-color: rgba(255, 189, 89, .5); }
+.role-card.ark-core {
+  min-height: 180px;
+  border-color: rgba(255, 189, 89, .58);
+  background: linear-gradient(135deg, rgba(255, 189, 89, .08), rgba(77, 229, 213, .045));
+}
 .role-card span { display: block; margin-bottom: 16px; color: var(--muted); font: 500 10px var(--mono); }
 .role-card strong { display: block; font-size: 13px; }
+.role-card.ark-core > strong { font-size: 18px; }
 .role-card small { display: block; margin-top: 5px; color: var(--muted); font-size: 9px; }
+.worker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 18px 0 14px; }
+.worker-grid i {
+  padding: 12px 10px;
+  border: 1px solid var(--line);
+  background: rgba(4, 11, 21, .58);
+  color: var(--ink);
+  font: 500 9px/1.35 var(--mono);
+  font-style: normal;
+}
+.worker-grid i:nth-child(2) { border-color: rgba(255, 189, 89, .45); }
+.worker-grid i:nth-child(3) { border-color: rgba(77, 229, 213, .4); }
+.worker-grid b { display: block; margin-top: 4px; color: var(--muted); font-size: 8px; font-weight: 400; }
 .boot-order { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 15px 0 0; color: var(--muted); font: 500 10px var(--mono); }
 .boot-order b { color: var(--ink); font-weight: 500; }
 .recovery-brace { margin-top: 10px; padding: 9px; border: 1px dashed rgba(255, 108, 201, .5); color: var(--pink); text-align: center; font: 500 9px var(--mono); letter-spacing: .07em; }
 .verdict { min-height: 46px; margin-top: 18px; padding: 13px 15px; border-left: 2px solid var(--cyan); background: rgba(77, 229, 213, .06); color: #c7d1de; font-size: 12px; line-height: 1.55; }
 .verdict.rejected { border-color: var(--danger); background: rgba(255, 109, 122, .07); }
+.verdict.strict { border-color: var(--amber); background: rgba(255, 189, 89, .07); }
 
 .insight-list { margin-top: 28px; }
 .insight-list > div { display: grid; grid-template-columns: 30px 1fr; column-gap: 8px; padding: 17px 0; border-top: 1px solid var(--line); }
@@ -278,6 +297,31 @@ select {
 .insight-list strong { font-size: 13px; }
 .insight-list p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
 .answer-chip { margin-top: 16px; padding: 13px; border: 1px solid rgba(255, 189, 89, .35); color: var(--amber); font: 500 9px/1.5 var(--mono); letter-spacing: .07em; }
+
+.scope-model {
+  display: grid;
+  grid-template-columns: .9fr 1.6fr;
+  align-items: center;
+  gap: 28px;
+  margin-bottom: 24px;
+  padding: clamp(22px, 3vw, 36px);
+}
+.scope-model p { margin: 12px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+.scope-flow { display: flex; align-items: center; justify-content: flex-end; gap: 9px; min-width: 0; }
+.scope-flow span {
+  min-width: 112px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  background: #081421;
+  color: var(--muted);
+  font: 500 9px/1.5 var(--mono);
+}
+.scope-flow span b { color: var(--ink); }
+.scope-flow span small { display: block; margin-top: 5px; color: #67798f; }
+.scope-flow span.procman-node { border-color: rgba(91, 146, 255, .5); color: var(--blue); }
+.scope-flow span.accent { border-color: rgba(255, 189, 89, .5); }
+.scope-flow span.accent b { color: var(--amber); }
+.scope-flow i { color: #64758b; font: 500 8px var(--mono); font-style: normal; text-transform: uppercase; }
 
 .rollback { display: grid; grid-template-columns: 1fr 2.2fr; align-items: center; gap: 26px; margin-bottom: 64px; }
 .rollback > p { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 11px; }
@@ -302,11 +346,12 @@ footer {
 }
 
 @media (max-width: 850px) {
-  .formula-strip, .result-grid, .rollback { grid-template-columns: 1fr; }
+  .formula-strip, .result-grid, .scope-model, .rollback { grid-template-columns: 1fr; }
   .formula-strip > div { border-right: 0; border-bottom: 1px solid var(--line); }
   .formula-strip > div:last-child { border-bottom: 0; }
   .controls-grid { grid-template-columns: repeat(2, 1fr); }
   .rollback-flow { justify-content: flex-start; overflow-x: auto; }
+  .scope-flow { justify-content: flex-start; overflow-x: auto; padding-bottom: 6px; }
   .rollback > p { grid-column: 1; }
 }
 
@@ -336,6 +381,8 @@ footer {
   .controls-grid { grid-template-columns: 1fr; }
   .toggle-control { grid-column: 1; }
   .role-row { grid-template-columns: repeat(2, 1fr); }
+  .architecture-diagram[data-topology="1"] .role-row { grid-template-columns: 1fr; }
+  .worker-grid { grid-template-columns: repeat(2, 1fr); }
   .rollback-flow { padding-bottom: 6px; }
   footer { width: calc(100% - 24px); flex-direction: column; gap: 9px; }
 }

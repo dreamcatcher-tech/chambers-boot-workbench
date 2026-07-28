@@ -5,6 +5,7 @@ import {
   bestCandidates,
   conflictViolations,
   generateCandidates,
+  hostRootSemanticCost,
   stagePass,
 } from "./src/model.js";
 
@@ -25,7 +26,7 @@ const elements = {
   topology: document.querySelector("#topologySelect"),
   packaging: document.querySelector("#packageSelect"),
   recovery: document.querySelector("#recoverySelect"),
-  relaxIsolation: document.querySelector("#relaxIsolation"),
+  requireIsolation: document.querySelector("#requireIsolation"),
   diagram: document.querySelector("#architectureDiagram"),
   verdict: document.querySelector("#verdict"),
   resultFormula: document.querySelector("#resultFormula"),
@@ -33,11 +34,11 @@ const elements = {
 
 const state = {
   stage: 5,
-  profile: "unified",
+  profile: "ark_core",
   topology: "any",
   packaging: "any",
   recovery: "any",
-  relaxIsolation: false,
+  requireIsolation: false,
   timer: null,
   active: [],
   selected: [],
@@ -45,18 +46,19 @@ const state = {
 
 const number = new Intl.NumberFormat("en-US");
 const profileNames = {
-  unified: "UNIFIED",
-  current: "CURRENT DOC",
+  ark_core: "ARK CORE",
+  strict: "STRICT EDGE",
   minimal: "MINIMUM",
   availability: "AVAILABILITY",
 };
 
 function stageOptions() {
   return {
-    strictIsolation: !state.relaxIsolation,
+    strictIsolation: state.requireIsolation,
     requireAtomic: true,
     boundFallback: true,
     wholeUpgrade: true,
+    requireGroupRecovery: state.profile !== "availability",
   };
 }
 
@@ -69,8 +71,7 @@ function matchesKnobs(candidate) {
 }
 
 function activeCandidates() {
-  const filterStage = Math.min(state.stage, 4);
-  return candidates.filter((candidate) => stagePass(candidate, filterStage, stageOptions()) && matchesKnobs(candidate));
+  return candidates.filter((candidate) => stagePass(candidate, state.stage, stageOptions()) && matchesKnobs(candidate));
 }
 
 function buildStageTrack() {
@@ -120,7 +121,7 @@ function drawMap() {
     if (isSelected) {
       context.fillStyle = "#ffbd59";
     } else if (isActive) {
-      context.fillStyle = state.stage >= 4 ? "#4de5d5" : "#5b92ff";
+      context.fillStyle = state.stage >= 3 ? "#4de5d5" : "#5b92ff";
     } else {
       context.fillStyle = "rgba(102, 126, 155, .08)";
     }
@@ -139,15 +140,39 @@ function drawMap() {
 }
 
 function blockName(block) {
-  if (block.length === 5) return "Unified control container";
+  if (block.length === 5) return "Ark Core Appliance";
   if (block.includes("A") && block.includes("R")) return "Gateway";
   return block.map((item) => RESPONSIBILITY_NAMES[item]).join(" + ");
 }
 
 function blockClass(block) {
+  if (block.length === 5) return "ark-core";
   if (block.includes("P")) return "persistence";
   if (block.includes("A") || block.includes("R")) return "gateway";
   return "";
+}
+
+function renderRoleCard(block) {
+  if (block.length === 5) {
+    return `
+      <div class="role-card ark-core">
+        <span>E + A + R + P + S · ONE GVISOR TASK</span>
+        <strong>Ark Core Appliance</strong>
+        <div class="worker-grid" aria-label="Required Ark Core workers">
+          <i>ENGINE <b>PID 1</b></i>
+          <i>PERSISTENCE <b>required</b></i>
+          <i>GATEWAY <b>A + R</b></i>
+          <i>SUPERVISOR <b>required</b></i>
+        </div>
+        <small>one image · one volume attachment · one Ark-private network</small>
+      </div>`;
+  }
+  return `
+    <div class="role-card ${blockClass(block)}">
+      <span>${block.join(" + ")}</span>
+      <strong>${blockName(block)}</strong>
+      <small>${block.map((item) => RESPONSIBILITY_NAMES[item]).join(" · ")}</small>
+    </div>`;
 }
 
 function renderArchitecture() {
@@ -156,42 +181,38 @@ function renderArchitecture() {
     elements.diagram.innerHTML = '<div class="package-shell"><div class="package-label">NO SURVIVING DESIGN</div></div>';
     elements.resultFormula.textContent = "∅";
     elements.verdict.className = "verdict rejected";
-    elements.verdict.textContent = state.topology === "one" && !state.relaxIsolation
-      ? "Rejected: one container merges the Persistence RW boundary, Engine TCB, enforcement, and lifecycle policy. Toggle “Relax capability separation” to inspect that trade."
+    elements.verdict.textContent = state.topology === "one" && state.requireIsolation
+      ? "Rejected only by the optional strict-isolation edge. Clear it to restore the accepted Ark Core profile."
       : "No point satisfies the current constraint and knob combination.";
     return;
   }
 
   const blocks = candidate.partition.blocks;
-  const roleCards = blocks.map((block) => `
-    <div class="role-card ${blockClass(block)}">
-      <span>${block.join(" + ")}</span>
-      <strong>${blockName(block)}</strong>
-      <small>${block.map((item) => RESPONSIBILITY_NAMES[item]).join(" · ")}</small>
-    </div>`).join("");
-
+  const roleCards = blocks.map(renderRoleCard).join("");
+  elements.diagram.dataset.topology = String(blocks.length);
   elements.diagram.innerHTML = `
     <div class="package-shell">
       <div class="package-label">K · ${LABELS.packaging[candidate.policy.packaging].toUpperCase()}</div>
       <div class="role-row" style="--role-count:${Math.min(blocks.length, 5)}">${roleCards}</div>
-      <div class="boot-order"><span>BOOT</span><b>${LABELS.boot[candidate.policy.boot]}</b></div>
+      <div class="boot-order"><span>CORE ORDER</span><b>${LABELS.boot[candidate.policy.boot]}</b></div>
     </div>
     <div class="recovery-brace">Γ · ${LABELS.recovery[candidate.policy.recovery].toUpperCase()}</div>`;
 
-  const packageCount = candidate.policy.packaging === "shared_image" ? "1 image" : candidate.policy.packaging === "bundle_index" ? "1 index" : "4 images";
+  const packageCount = candidate.policy.packaging === "separate_images" ? blocks.length : 1;
   const recoveryCount = candidate.policy.recovery === "group" ? 1 : blocks.length;
   elements.resultFormula.textContent = `|K|=${packageCount} · |Π|=${blocks.length} · |Γ|=${recoveryCount}`;
 
   const violations = conflictViolations(candidate.partition);
-  if (violations.length) {
-    elements.verdict.className = "verdict rejected";
-    elements.verdict.textContent = `Explorable only with relaxed isolation: ${violations.length} authority conflict${violations.length === 1 ? "" : "s"} are co-located. Mechanical simplicity is bought by widening the trusted and writable boundary.`;
-  } else if (candidate.policy.packaging === "shared_image") {
+  const rootCost = hostRootSemanticCost(candidate.partition);
+  if (blocks.length === 1 && candidate.policy.packaging === "shared_image" && candidate.policy.recovery === "group") {
     elements.verdict.className = "verdict";
-    elements.verdict.textContent = "Feasible: one immutable image can launch four role-scoped containers. ProcMan still restarts them as one group; only Persistence receives the RW volume.";
+    elements.verdict.textContent = `Accepted: one Ark Core image, one gVisor task, four required III worker roles, and one whole-appliance recovery fate. Host-root semantic cost ${rootCost}; accepted residual exposure ${violations.length} cross-role edges.`;
+  } else if (violations.length === 0) {
+    elements.verdict.className = "verdict strict";
+    elements.verdict.textContent = `Strict-isolation sensitivity: ${blocks.length} runtime boundaries preserve every cross-role sandbox edge, but raise ProcMan's task/orchestration cost to ${rootCost}.`;
   } else {
     elements.verdict.className = "verdict";
-    elements.verdict.textContent = "Recommended: one selected OCI index binds four role images; ProcMan launches four isolated Chambers and applies one group recovery policy.";
+    elements.verdict.textContent = `Boundary-rebalanced candidate: ${violations.length} cross-role isolation edges become explicit residual risk so the host-root launch and recovery surface can shrink to cost ${rootCost}.`;
   }
 }
 
@@ -257,8 +278,8 @@ elements.recovery.addEventListener("change", (event) => {
   state.stage = 5;
   render();
 });
-elements.relaxIsolation.addEventListener("change", (event) => {
-  state.relaxIsolation = event.target.checked;
+elements.requireIsolation.addEventListener("change", (event) => {
+  state.requireIsolation = event.target.checked;
   state.stage = 5;
   render();
 });
@@ -272,10 +293,11 @@ elements.canvas.addEventListener("mousemove", (event) => {
   const candidate = candidates[partitionOrdinal * policyCount + policyOrdinal];
   if (!candidate) return;
   const survives = state.active.some((active) => active.id === candidate.id);
+  const exposure = conflictViolations(candidate.partition).length;
   elements.tooltip.hidden = false;
   elements.tooltip.style.left = `${Math.min(event.offsetX + 14, rect.width - 276)}px`;
   elements.tooltip.style.top = `${Math.max(4, event.offsetY - 68)}px`;
-  elements.tooltip.innerHTML = `<b>${survives ? "SURVIVES" : "FILTERED"}</b><br>${candidate.partition.key}<br>${LABELS.boot[candidate.policy.boot]} · ${LABELS.recovery[candidate.policy.recovery]}<br>${LABELS.packaging[candidate.policy.packaging]}`;
+  elements.tooltip.innerHTML = `<b>${survives ? "SURVIVES" : "FILTERED"}</b><br>${candidate.partition.key}<br>root cost ${hostRootSemanticCost(candidate.partition)} · isolation exposure ${exposure}<br>${LABELS.recovery[candidate.policy.recovery]} · ${LABELS.packaging[candidate.policy.packaging]}`;
 });
 elements.canvas.addEventListener("mouseleave", () => { elements.tooltip.hidden = true; });
 

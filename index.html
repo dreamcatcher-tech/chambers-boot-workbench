@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Interactive constraint-synthesis map of the Chambers Boot-set design space.">
+  <meta name="description" content="Interactive constraint-synthesis map for the accepted Chambers Ark Core Appliance and strict-isolation sensitivity profile.">
   <meta name="theme-color" content="#07111f">
-  <title>Chambers Boot-set Workbench</title>
+  <title>Chambers Ark Core Workbench</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -13,38 +13,38 @@
   <div class="ambient ambient-b" aria-hidden="true"></div>
 
   <header class="site-header">
-    <a class="brand" href="#top" aria-label="Boot-set Workbench home">
+    <a class="brand" href="#top" aria-label="Ark Core Workbench home">
       <span class="brand-mark">∷</span>
-      <span>BOOT-SET WORKBENCH</span>
+      <span>ARK CORE WORKBENCH</span>
     </a>
     <a class="source-link" href="https://github.com/dreamcatcher-tech/chambers-boot-workbench">SOURCE ↗</a>
   </header>
 
   <main id="top">
     <section class="hero">
-      <p class="eyebrow">BOUNDED ARCHITECTURE SYNTHESIS · V2</p>
-      <h1>One artifact.<br><span>Four boundaries.</span><br>One recovery group.</h1>
-      <div class="hero-formula" aria-label="Recommended partition sizes">
+      <p class="eyebrow">BOUNDED ARCHITECTURE SYNTHESIS · V3</p>
+      <h1>One appliance.<br><span>Four workers.</span><br>One recovery fate.</h1>
+      <div class="hero-formula" aria-label="Accepted partition sizes">
         <span>|K| = 1</span><i>packaging</i>
-        <b>≠</b>
-        <span>|Π| = 4</span><i>isolation</i>
-        <b>≠</b>
+        <b>=</b>
+        <span>|Π| = 1</span><i>runtime</i>
+        <b>=</b>
         <span>|Γ| = 1</span><i>recovery</i>
       </div>
-      <p class="hero-note">Packaging, privilege isolation, and restart fate are independent choices.</p>
+      <p class="hero-note">Less isolation inside the trusted core ↔ a smaller, less semantic host-root ProcMan.</p>
     </section>
 
     <section class="formula-strip" aria-label="Model formulas">
       <div><small>DESIGN SPACE</small><strong>𝓓 = B₅ × 576 = <span id="formulaTotal">29,952</span></strong></div>
       <div><small>FEASIBLE SET</small><strong>𝓕 = { d ∈ 𝓓 | ⋀ Iₖ(d) }</strong></div>
-      <div><small>SELECTION</small><strong>d* = arg lex min J(d)</strong></div>
+      <div><small>ROOT OBJECTIVE</small><strong>Jᵣ = tasks + host edges</strong></div>
     </section>
 
     <section class="workbench panel" aria-labelledby="mapTitle">
       <div class="panel-head">
         <div>
           <p class="eyebrow">THE COMPLETE BOUNDED MAP</p>
-          <h2 id="mapTitle">52 topologies × 576 policies</h2>
+          <h2 id="mapTitle">52 placements × 576 policies</h2>
         </div>
         <button id="playButton" class="play-button" type="button"><span>▶</span> PLAY CONVERGENCE</button>
       </div>
@@ -53,13 +53,13 @@
 
       <div class="stats-row" aria-live="polite">
         <div><span id="stageName">MAP</span><strong id="survivorCount">29,952</strong><small>SURVIVORS</small></div>
-        <div><span>TOPOLOGIES</span><strong id="topologyCount">52</strong><small>ACTIVE</small></div>
-        <div><span>OBJECTIVE</span><strong id="objectiveName">UNIFIED</strong><small>PROFILE</small></div>
+        <div><span>PLACEMENTS</span><strong id="topologyCount">52</strong><small>ACTIVE</small></div>
+        <div><span>OBJECTIVE</span><strong id="objectiveName">ARK CORE</strong><small>PROFILE</small></div>
       </div>
 
       <div class="map-wrap">
-        <div class="map-axis map-axis-y">52 ISOLATION PARTITIONS</div>
-        <canvas id="solutionMap" width="1152" height="416" aria-label="Every candidate design arranged by topology and policy"></canvas>
+        <div class="map-axis map-axis-y">52 RUNTIME PLACEMENTS</div>
+        <canvas id="solutionMap" width="1152" height="416" aria-label="Every candidate design arranged by placement and policy"></canvas>
         <div class="map-axis map-axis-x">576 BOOT · SELECTION · FALLBACK · UPGRADE · RECOVERY · RELEASE · PACKAGE POLICIES</div>
         <div id="mapTooltip" class="map-tooltip" hidden></div>
       </div>
@@ -68,41 +68,41 @@
         <label>
           <span>Objective</span>
           <select id="profileSelect">
-            <option value="unified">Unified restart baseline</option>
-            <option value="current">Current sequence document</option>
+            <option value="ark_core">Accepted Ark Core</option>
+            <option value="strict">Strict-isolation sensitivity</option>
             <option value="minimal">Minimum mechanism</option>
-            <option value="availability">Availability-first</option>
+            <option value="availability">Availability sensitivity</option>
           </select>
         </label>
         <label>
           <span>Runtime boundary</span>
           <select id="topologySelect">
             <option value="any">Solver chooses</option>
-            <option value="four">Four boundaries</option>
-            <option value="one">One container</option>
+            <option value="one">One Ark Core task</option>
+            <option value="four">Four role tasks</option>
           </select>
         </label>
         <label>
           <span>Packaging</span>
           <select id="packageSelect">
             <option value="any">Solver chooses</option>
+            <option value="shared_image">One Ark Core image</option>
             <option value="bundle_index">One OCI index</option>
-            <option value="shared_image">One shared image</option>
-            <option value="separate_images">Separate images</option>
+            <option value="separate_images">Independent role images</option>
           </select>
         </label>
         <label>
           <span>Crash policy</span>
           <select id="recoverySelect">
             <option value="any">Solver chooses</option>
-            <option value="group">Restart complete set</option>
+            <option value="group">Restart whole appliance</option>
             <option value="member">Repair failed member</option>
           </select>
         </label>
         <label class="toggle-control">
-          <input id="relaxIsolation" type="checkbox">
+          <input id="requireIsolation" type="checkbox">
           <span class="toggle" aria-hidden="true"></span>
-          <span><b>Relax capability separation</b><small>Allows a one-container experiment</small></span>
+          <span><b>Require cross-role sandbox separation</b><small>Re-promote the inherited defense-in-depth edge to a hard constraint</small></span>
         </label>
       </div>
     </section>
@@ -112,9 +112,9 @@
         <div class="panel-head compact">
           <div>
             <p class="eyebrow">SELECTED POINT</p>
-            <h2 id="resultTitle">The three partitions stay separate</h2>
+            <h2 id="resultTitle">The host root stops orchestrating</h2>
           </div>
-          <div id="resultFormula" class="result-formula">|K|=1 · |Π|=4 · |Γ|=1</div>
+          <div id="resultFormula" class="result-formula">|K|=1 · |Π|=1 · |Γ|=1</div>
         </div>
 
         <div id="architectureDiagram" class="architecture-diagram"></div>
@@ -122,19 +122,36 @@
       </article>
 
       <aside class="panel insight-panel">
-        <p class="eyebrow">WHY NOT ONE CONTAINER?</p>
+        <p class="eyebrow">WHY ONE APPLIANCE?</p>
         <div class="insight-list">
-          <div><span>01</span><strong>RW volume</strong><p>Only Persistence receives it.</p></div>
-          <div><span>02</span><strong>Privilege</strong><p>Engine stays policy-free.</p></div>
-          <div><span>03</span><strong>Evidence</strong><p>Failures remain attributable.</p></div>
+          <div><span>01</span><strong>Host root</strong><p>ProcMan starts one opaque task.</p></div>
+          <div><span>02</span><strong>Upgrade domain</strong><p>Core orchestration moves with the image.</p></div>
+          <div><span>03</span><strong>Shared fate</strong><p>Any required worker exits Engine.</p></div>
         </div>
-        <div class="answer-chip">ONE DIGEST CAN STILL LAUNCH FOUR ISOLATED TASKS</div>
+        <div class="answer-chip">ACCEPTED RISK · CONTAINER ROOT CAN REACH PERSISTENCE</div>
       </aside>
+    </section>
+
+    <section class="scope-model panel" aria-labelledby="scopeTitle">
+      <div>
+        <p class="eyebrow">THE SAME PRIMITIVE SCALES DOWNWARD</p>
+        <h2 id="scopeTitle">One ProcMan. Isolated Ark Core scopes.</h2>
+        <p>Selector · LKG · volume · private network · Engine · descendants per scope. No sibling route.</p>
+      </div>
+      <div class="scope-flow" aria-label="ProcMan with independent Ark scopes and a candidate child scope">
+        <span class="procman-node">PROCMAN</span>
+        <i>scope</i>
+        <span>ARK A<br><b>CORE</b><small>children A</small></span>
+        <i>scope</i>
+        <span>ARK B<br><b>CORE</b><small>children B</small></span>
+        <i>child</i>
+        <span class="accent">A′ CANDIDATE<br><b>CORE</b><small>own descendants</small></span>
+      </div>
     </section>
 
     <section class="rollback panel" aria-labelledby="rollbackTitle">
       <div>
-        <p class="eyebrow">PROCMan RECOVERY</p>
+        <p class="eyebrow">PROCMAN RECOVERY</p>
         <h2 id="rollbackTitle">Latest fails before effects → consume LKG once</h2>
       </div>
       <div class="rollback-flow" aria-label="Monotonic one-use rollback flow">
@@ -149,8 +166,8 @@
   </main>
 
   <footer>
-    <span>FINITE GRAMMAR · EXHAUSTIVE ENUMERATION · EXPLICIT OBJECTIVES</span>
-    <span id="modelDigest">MODEL V2</span>
+    <span>FINITE GRAMMAR · PROVISIONAL HARD EDGES · EXPLICIT OBJECTIVES</span>
+    <span id="modelDigest">MODEL V3</span>
   </footer>
 
   <script type="module" src="app.js"></script>

@@ -8,65 +8,87 @@ import {
   generatePartitions,
   generatePolicies,
   hasGatewayPair,
+  hostRootSemanticCost,
   stageCounts,
   stagePass,
 } from "../src/model.js";
 
 const candidates = generateCandidates();
 
-test("the v2 grammar is exhaustively enumerated", () => {
+const acceptedOptions = {
+  strictIsolation: false,
+  requireAtomic: true,
+  boundFallback: true,
+  wholeUpgrade: true,
+  requireGroupRecovery: true,
+};
+
+test("the v3 grammar is exhaustively enumerated", () => {
   assert.equal(generatePartitions().length, 52);
   assert.equal(generatePolicies().length, 576);
   assert.equal(candidates.length, 29_952);
-  assert.deepEqual(stageCounts(candidates).slice(0, 5), [29_952, 1_152, 576, 384, 192]);
+  assert.deepEqual(stageCounts(candidates, acceptedOptions), [29_952, 14_976, 9_984, 2_496, 2_496, 2_496]);
 });
 
-test("strict authority separation leaves exactly two static partitions", () => {
+test("strict cross-role isolation remains an explicit sensitivity profile", () => {
   const partitions = generatePartitions().filter((partition) => conflictViolations(partition).length === 0);
   assert.equal(partitions.length, 2);
   assert.deepEqual(partitions.map((partition) => partition.blocks.length).sort(), [4, 5]);
   const minimum = partitions.find((partition) => partition.blocks.length === 4);
   assert.ok(minimum);
   assert.equal(hasGatewayPair(minimum), true);
+
+  const strictCounts = stageCounts(candidates, { ...acceptedOptions, strictIsolation: true });
+  assert.deepEqual(strictCounts, [29_952, 14_976, 9_984, 2_496, 96, 96]);
 });
 
-test("one container is rejected while one shared image across four containers is feasible", () => {
-  const oneContainer = candidates.find((candidate) => candidate.partition.blocks.length === 1);
-  assert.ok(oneContainer);
-  assert.equal(stagePass(oneContainer, 1), false);
-
-  const sharedImage = candidates.find((candidate) =>
-    candidate.partition.blocks.length === 4
-    && conflictViolations(candidate.partition).length === 0
+test("one Core task survives accepted constraints but fails a re-promoted isolation edge", () => {
+  const oneContainer = candidates.find((candidate) =>
+    candidate.partition.blocks.length === 1
     && candidate.policy.selector === "atomic"
     && candidate.policy.fallback === "bounded_lkg"
     && candidate.policy.upgrade === "whole_set"
-    && candidate.policy.packaging === "shared_image"
+    && candidate.policy.recovery === "group"
   );
-  assert.ok(sharedImage);
-  assert.equal(stagePass(sharedImage, 4), true);
+  assert.ok(oneContainer);
+  assert.equal(stagePass(oneContainer, 4, acceptedOptions), true);
+  assert.equal(stagePass(oneContainer, 4, { ...acceptedOptions, strictIsolation: true }), false);
+  assert.equal(conflictViolations(oneContainer.partition).length, 9);
+  assert.equal(hostRootSemanticCost(oneContainer.partition), 1);
 });
 
-test("the unified-restart objective has one deterministic optimum", () => {
-  const feasible = candidates.filter((candidate) => stagePass(candidate, 4));
-  const best = bestCandidates(feasible, "unified");
+test("the accepted Ark Core objective has one deterministic optimum", () => {
+  const feasible = candidates.filter((candidate) => stagePass(candidate, 4, acceptedOptions));
+  const best = bestCandidates(feasible, "ark_core");
   assert.equal(best.length, 1);
-  assert.equal(best[0].partition.blocks.length, 4);
+  assert.equal(best[0].partition.blocks.length, 1);
   assert.equal(hasGatewayPair(best[0].partition), true);
   assert.equal(best[0].policy.boot, "persistence_first");
   assert.equal(best[0].policy.writer, "persistence");
   assert.equal(best[0].policy.fallback, "bounded_lkg");
   assert.equal(best[0].policy.recovery, "group");
-  assert.equal(best[0].policy.packaging, "bundle_index");
+  assert.equal(best[0].policy.release, "child_scope");
+  assert.equal(best[0].policy.packaging, "shared_image");
 });
 
-test("the current-document profile differs only at same-selection recovery", () => {
-  const feasible = candidates.filter((candidate) => stagePass(candidate, 4));
-  const unified = bestCandidates(feasible, "unified")[0];
-  const current = bestCandidates(feasible, "current")[0];
-  assert.equal(unified.partition.key, current.partition.key);
-  assert.equal(unified.policy.boot, current.policy.boot);
-  assert.equal(unified.policy.fallback, current.policy.fallback);
-  assert.equal(unified.policy.recovery, "group");
-  assert.equal(current.policy.recovery, "member");
+test("the strict-isolation objective recovers the former four-boundary answer", () => {
+  const feasible = candidates.filter((candidate) => stagePass(candidate, 4, acceptedOptions));
+  const strict = bestCandidates(feasible, "strict");
+  assert.equal(strict.length, 1);
+  assert.equal(strict[0].partition.blocks.length, 4);
+  assert.equal(conflictViolations(strict[0].partition).length, 0);
+  assert.equal(hasGatewayPair(strict[0].partition), true);
+  assert.equal(strict[0].policy.packaging, "bundle_index");
+  assert.equal(strict[0].policy.recovery, "group");
+  assert.ok(hostRootSemanticCost(strict[0].partition) > hostRootSemanticCost(bestCandidates(feasible, "ark_core")[0].partition));
+});
+
+test("availability sensitivity can reopen member recovery without changing the accepted baseline", () => {
+  const availabilityOptions = { ...acceptedOptions, requireGroupRecovery: false };
+  const feasible = candidates.filter((candidate) => stagePass(candidate, 4, availabilityOptions));
+  const best = bestCandidates(feasible, "availability");
+  assert.equal(best.length, 1);
+  assert.equal(best[0].partition.blocks.length, 4);
+  assert.equal(best[0].policy.recovery, "member");
+  assert.equal(conflictViolations(best[0].partition).length, 0);
 });
