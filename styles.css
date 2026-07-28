@@ -321,11 +321,17 @@ footer {
   .hero-formula i { grid-column: 2 !important; grid-row: auto; align-self: center; }
   .panel-head { align-items: flex-start; flex-direction: column; }
   .play-button { width: 100%; }
-  .stage-track { overflow-x: auto; grid-template-columns: repeat(6, minmax(72px, 1fr)); }
+  .stage-track {
+    overflow: visible;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 18px;
+  }
+  .stage-track button { font-size: 8px; white-space: nowrap; }
   .stats-row { grid-template-columns: 1fr; }
   .stats-row > div { border-right: 0; border-bottom: 1px solid var(--line); }
   .stats-row > div:last-child { border-bottom: 0; }
   .map-wrap { padding-left: 17px; overflow: hidden; }
+  #solutionMap { height: 220px; }
   .map-axis-y, .map-axis-x { display: none; }
   .controls-grid { grid-template-columns: 1fr; }
   .toggle-control { grid-column: 1; }
