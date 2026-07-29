@@ -1,6 +1,7 @@
 import {
   LABELS,
   RESPONSIBILITY_NAMES,
+  RUNTIME_PROOF,
   STAGES,
   bestCandidates,
   conflictViolations,
@@ -31,6 +32,9 @@ const elements = {
   verdict: document.querySelector("#verdict"),
   resultTitle: document.querySelector("#resultTitle"),
   resultFormula: document.querySelector("#resultFormula"),
+  proofCount: document.querySelector("#proofCheckCount"),
+  proofSummary: document.querySelector("#proofSummary"),
+  proofPending: document.querySelector("#proofPending"),
 };
 
 const state = {
@@ -160,12 +164,16 @@ function renderRoleCard(block) {
         <span>E + A + R + P + S · ONE GVISOR TASK</span>
         <strong>Ark Core Appliance</strong>
         <div class="worker-grid" aria-label="Required Ark Core workers">
-          <i>ENGINE <b>PID 1</b></i>
+          <i>ENGINE <b>PID 1 after exec</b></i>
           <i>PERSISTENCE <b>required</b></i>
           <i>GATEWAY <b>A + R</b></i>
           <i>SUPERVISOR <b>required</b></i>
         </div>
-        <small>one image · one volume attachment · one Ark-private network</small>
+        <div class="runtime-paths" aria-label="Proven Ark Core runtime boundaries">
+          <span>IMAGE BOOTSTRAP → /run/iii → EXEC ENGINE</span>
+          <span>LOOPBACK WORKERS → GATEWAY-AUTHORIZED PRIVATE PORT</span>
+        </div>
+        <small>one image · Core-only volume · per-task Ark-private network · no sibling forwarding</small>
       </div>`;
   }
   return `
@@ -213,7 +221,7 @@ function renderArchitecture() {
   if (state.profile === "ark_core" && acceptedShape) {
     elements.resultTitle.textContent = "The host root stops orchestrating";
     elements.verdict.className = "verdict";
-    elements.verdict.textContent = `Accepted: one Ark Core image, one gVisor task, four required III worker roles, and one whole-appliance recovery fate. Host-root semantic cost ${rootCost}; accepted residual exposure ${violations.length} cross-role edges.`;
+    elements.verdict.textContent = `Accepted: one Ark Core image, one gVisor task, Engine PID 1 after bootstrap exec, four required III worker roles, dual Worker Manager paths, and one whole-appliance recovery fate. ${RUNTIME_PROOF.checkCount}/${RUNTIME_PROOF.checkCount} bounded runsc checks passed. Host-root semantic cost ${rootCost}; accepted residual exposure ${violations.length} cross-role edges.`;
   } else if (state.profile === "strict" && violations.length === 0) {
     elements.resultTitle.textContent = "Strict isolation restores four boundaries";
     elements.verdict.className = "verdict strict";
@@ -322,5 +330,8 @@ elements.canvas.addEventListener("mousemove", (event) => {
 });
 elements.canvas.addEventListener("mouseleave", () => { elements.tooltip.hidden = true; });
 
+elements.proofCount.textContent = `${RUNTIME_PROOF.checkCount}/${RUNTIME_PROOF.checkCount}`;
+elements.proofSummary.textContent = RUNTIME_PROOF.mechanisms.join(" · ");
+elements.proofPending.textContent = RUNTIME_PROOF.pending;
 buildStageTrack();
 render();

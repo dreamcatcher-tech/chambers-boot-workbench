@@ -22,7 +22,7 @@
 
   <main id="top">
     <section class="hero">
-      <p class="eyebrow">BOUNDED ARCHITECTURE SYNTHESIS · V3</p>
+      <p class="eyebrow">BOUNDED ARCHITECTURE SYNTHESIS · V3 · RUNTIME-PROVEN MECHANISMS</p>
       <h1>One appliance.<br><span>Four workers.</span><br>One recovery fate.</h1>
       <div class="hero-formula" aria-label="Accepted partition sizes">
         <span>|K| = 1</span><i>packaging</i>
@@ -124,9 +124,9 @@
       <aside class="panel insight-panel">
         <p class="eyebrow">WHY ONE APPLIANCE?</p>
         <div class="insight-list">
-          <div><span>01</span><strong>Host root</strong><p>ProcMan starts one opaque task.</p></div>
-          <div><span>02</span><strong>Upgrade domain</strong><p>Core orchestration moves with the image.</p></div>
-          <div><span>03</span><strong>Shared fate</strong><p>Any required worker exits Engine.</p></div>
+          <div><span>01</span><strong>PID 1</strong><p>Image bootstrap seeds private runtime tmpfs, then execs Engine.</p></div>
+          <div><span>02</span><strong>Dual listener</strong><p>Loopback admits required workers; Gateway authorizes the private port.</p></div>
+          <div><span>03</span><strong>Shared fate</strong><p>Any required worker exits Engine and restarts the whole scope.</p></div>
         </div>
         <div class="answer-chip">ACCEPTED RISK · CONTAINER ROOT CAN REACH PERSISTENCE</div>
       </aside>
@@ -136,16 +136,26 @@
       <div>
         <p class="eyebrow">THE SAME PRIMITIVE SCALES DOWNWARD</p>
         <h2 id="scopeTitle">One ProcMan. Isolated Ark Core scopes.</h2>
-        <p>Selector · LKG · volume · private network · Engine · descendants per scope. No sibling route.</p>
+        <p>Selector · LKG · Core-only volume · per-task private network · Engine · descendants per scope. Explicit no-forwarding fence.</p>
       </div>
       <div class="scope-flow" aria-label="ProcMan with independent Ark scopes and a candidate child scope">
         <span class="procman-node">PROCMAN</span>
         <i>scope</i>
-        <span>ARK A<br><b>CORE</b><small>children A</small></span>
+        <span>ARK A<br><b>CORE</b><small>task links A</small></span>
         <i>scope</i>
-        <span>ARK B<br><b>CORE</b><small>children B</small></span>
+        <span>ARK B<br><b>CORE</b><small>task links B</small></span>
         <i>child</i>
-        <span class="accent">A′ CANDIDATE<br><b>CORE</b><small>own descendants</small></span>
+        <span class="accent">A′ CANDIDATE<br><b>CORE</b><small>connection-derived scope</small></span>
+      </div>
+    </section>
+
+    <section class="proof-panel panel" aria-labelledby="proofTitle">
+      <div class="proof-score"><strong id="proofCheckCount">22/22</strong><small>BOUNDED CHECKS</small></div>
+      <div>
+        <p class="eyebrow">SEALED RUNSC PROOF</p>
+        <h2 id="proofTitle">The mechanism boundary has receipts.</h2>
+        <p id="proofSummary">Loading verified mechanisms…</p>
+        <small id="proofPending">Loading integration boundary…</small>
       </div>
     </section>
 
@@ -167,7 +177,7 @@
 
   <footer>
     <span>FINITE GRAMMAR · PROVISIONAL HARD EDGES · EXPLICIT OBJECTIVES</span>
-    <span id="modelDigest">MODEL V3</span>
+    <span id="modelDigest">MODEL V3 · PROOF 22/22</span>
   </footer>
 
   <script type="module" src="app.js"></script>

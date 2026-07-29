@@ -37,6 +37,20 @@ export const STAGES = [
   { id: "optimize", label: "Optimize", short: "Minimize host-root semantics" },
 ];
 
+export const RUNTIME_PROOF = Object.freeze({
+  checkCount: 22,
+  chambersCommit: "17543edafb53c007582886032df07af8297f4f5a",
+  iiiCommit: "56c4304aa368efdc925b69baaf6356cc723ba0ca",
+  mechanisms: [
+    "dual Worker Manager listeners",
+    "private per-task networking and no-forwarding fences",
+    "essential-worker fatality and whole-scope restart",
+    "connection-derived child scope and volume isolation",
+    "one-use LKG recovery",
+  ],
+  pending: "Production containerd/CNI-plugin, storage-driver, packaging, and deployment integration remain pending.",
+});
+
 export function generatePartitions(items = RESPONSIBILITIES) {
   let partitions = [[]];
   for (const item of items) {

@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  RUNTIME_PROOF,
   bestCandidates,
   conflictViolations,
   generateCandidates,
@@ -22,6 +23,14 @@ const acceptedOptions = {
   wholeUpgrade: true,
   requireGroupRecovery: true,
 };
+
+test("runtime proof metadata stays exact", () => {
+  assert.equal(RUNTIME_PROOF.checkCount, 22);
+  assert.equal(RUNTIME_PROOF.chambersCommit, "17543edafb53c007582886032df07af8297f4f5a");
+  assert.equal(RUNTIME_PROOF.iiiCommit, "56c4304aa368efdc925b69baaf6356cc723ba0ca");
+  assert.equal(RUNTIME_PROOF.mechanisms.length, 5);
+  assert.match(RUNTIME_PROOF.pending, /containerd\/CNI-plugin.*storage-driver.*deployment/);
+});
 
 test("the v3 grammar is exhaustively enumerated", () => {
   assert.equal(generatePartitions().length, 52);
