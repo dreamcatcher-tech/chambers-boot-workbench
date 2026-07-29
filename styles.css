@@ -261,7 +261,7 @@ select {
 }
 .package-label { position: absolute; left: 14px; top: 11px; color: var(--blue); font: 500 9px var(--mono); letter-spacing: .08em; }
 .role-row { display: grid; grid-template-columns: repeat(var(--role-count, 4), minmax(0, 1fr)); gap: 10px; }
-.role-card { min-width: 0; min-height: 98px; padding: 14px; border: 1px solid var(--line); background: #0a1625; overflow-wrap: anywhere; }
+.role-card { min-width: 0; min-height: 98px; padding: 14px; border: 1px solid var(--line); background: #0a1625; }
 .role-card.gateway { border-color: rgba(77, 229, 213, .45); }
 .role-card.persistence { border-color: rgba(255, 189, 89, .5); }
 .role-card.ark-core {
@@ -386,6 +386,10 @@ footer {
   .worker-grid { grid-template-columns: repeat(2, 1fr); }
   .rollback-flow { padding-bottom: 6px; }
   footer { width: calc(100% - 24px); flex-direction: column; gap: 9px; }
+}
+
+@media (max-width: 360px) {
+  .role-row { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {
