@@ -29,6 +29,7 @@ const elements = {
   requireIsolation: document.querySelector("#requireIsolation"),
   diagram: document.querySelector("#architectureDiagram"),
   verdict: document.querySelector("#verdict"),
+  resultTitle: document.querySelector("#resultTitle"),
   resultFormula: document.querySelector("#resultFormula"),
 };
 
@@ -179,6 +180,7 @@ function renderArchitecture() {
   const candidate = state.selected[0] ?? state.active[0];
   if (!candidate) {
     elements.diagram.innerHTML = '<div class="package-shell"><div class="package-label">NO SURVIVING DESIGN</div></div>';
+    elements.resultTitle.textContent = "No surviving design";
     elements.resultFormula.textContent = "∅";
     elements.verdict.className = "verdict rejected";
     elements.verdict.textContent = state.topology === "one" && state.requireIsolation
@@ -204,13 +206,32 @@ function renderArchitecture() {
 
   const violations = conflictViolations(candidate.partition);
   const rootCost = hostRootSemanticCost(candidate.partition);
-  if (blocks.length === 1 && candidate.policy.packaging === "shared_image" && candidate.policy.recovery === "group") {
+  const acceptedShape = blocks.length === 1
+    && candidate.policy.packaging === "shared_image"
+    && candidate.policy.recovery === "group";
+
+  if (state.profile === "ark_core" && acceptedShape) {
+    elements.resultTitle.textContent = "The host root stops orchestrating";
     elements.verdict.className = "verdict";
     elements.verdict.textContent = `Accepted: one Ark Core image, one gVisor task, four required III worker roles, and one whole-appliance recovery fate. Host-root semantic cost ${rootCost}; accepted residual exposure ${violations.length} cross-role edges.`;
-  } else if (violations.length === 0) {
+  } else if (state.profile === "strict" && violations.length === 0) {
+    elements.resultTitle.textContent = "Strict isolation restores four boundaries";
     elements.verdict.className = "verdict strict";
     elements.verdict.textContent = `Strict-isolation sensitivity: ${blocks.length} runtime boundaries preserve every cross-role sandbox edge, but raise ProcMan's task/orchestration cost to ${rootCost}.`;
+  } else if (state.profile === "availability" && candidate.policy.recovery === "member") {
+    elements.resultTitle.textContent = "Availability reopens member repair";
+    elements.verdict.className = "verdict strict";
+    elements.verdict.textContent = `Availability sensitivity: ${blocks.length} isolated role boundaries permit member repair, increasing host-root task/orchestration cost to ${rootCost}. This is not the accepted baseline.`;
+  } else if (acceptedShape) {
+    elements.resultTitle.textContent = "The minimum mechanism remains one Core";
+    elements.verdict.className = "verdict";
+    elements.verdict.textContent = `Minimum-mechanism sensitivity: one shared Core keeps host-root cost at ${rootCost}, but its boot/writer policy differs from the accepted Ark Core profile.`;
+  } else if (violations.length === 0) {
+    elements.resultTitle.textContent = "Every inherited isolation edge is preserved";
+    elements.verdict.className = "verdict strict";
+    elements.verdict.textContent = `Sensitivity candidate: ${blocks.length} runtime boundaries preserve every cross-role sandbox edge at host-root task/orchestration cost ${rootCost}.`;
   } else {
+    elements.resultTitle.textContent = "A rebalanced boundary survives";
     elements.verdict.className = "verdict";
     elements.verdict.textContent = `Boundary-rebalanced candidate: ${violations.length} cross-role isolation edges become explicit residual risk so the host-root launch and recovery surface can shrink to cost ${rootCost}.`;
   }
