@@ -9,7 +9,7 @@ export const RESPONSIBILITY_NAMES = {
 };
 
 // These are defense-in-depth edges, not universal feasibility constraints.
-// The accepted Ark Core profile prices their co-location as residual risk;
+// The historically selected Ark Core synthesis profile prices their co-location as residual risk;
 // the strict-isolation sensitivity profile promotes them back to hard edges.
 export const CORE_ISOLATION_EDGES = [
   ["E", "A"], ["E", "R"], ["E", "P"], ["E", "S"],

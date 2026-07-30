@@ -16,7 +16,7 @@ import {
 
 const candidates = generateCandidates();
 
-const acceptedOptions = {
+const selectedOptions = {
   strictIsolation: false,
   requireAtomic: true,
   boundFallback: true,
@@ -36,7 +36,7 @@ test("the v3 grammar is exhaustively enumerated", () => {
   assert.equal(generatePartitions().length, 52);
   assert.equal(generatePolicies().length, 576);
   assert.equal(candidates.length, 29_952);
-  assert.deepEqual(stageCounts(candidates, acceptedOptions), [29_952, 14_976, 9_984, 2_496, 2_496, 2_496]);
+  assert.deepEqual(stageCounts(candidates, selectedOptions), [29_952, 14_976, 9_984, 2_496, 2_496, 2_496]);
 });
 
 test("strict cross-role isolation remains an explicit sensitivity profile", () => {
@@ -47,11 +47,11 @@ test("strict cross-role isolation remains an explicit sensitivity profile", () =
   assert.ok(minimum);
   assert.equal(hasGatewayPair(minimum), true);
 
-  const strictCounts = stageCounts(candidates, { ...acceptedOptions, strictIsolation: true });
+  const strictCounts = stageCounts(candidates, { ...selectedOptions, strictIsolation: true });
   assert.deepEqual(strictCounts, [29_952, 14_976, 9_984, 2_496, 96, 96]);
 });
 
-test("one Core task survives accepted constraints but fails a re-promoted isolation edge", () => {
+test("one Core task survives selected constraints but fails a re-promoted isolation edge", () => {
   const oneContainer = candidates.find((candidate) =>
     candidate.partition.blocks.length === 1
     && candidate.policy.selector === "atomic"
@@ -60,14 +60,14 @@ test("one Core task survives accepted constraints but fails a re-promoted isolat
     && candidate.policy.recovery === "group"
   );
   assert.ok(oneContainer);
-  assert.equal(stagePass(oneContainer, 4, acceptedOptions), true);
-  assert.equal(stagePass(oneContainer, 4, { ...acceptedOptions, strictIsolation: true }), false);
+  assert.equal(stagePass(oneContainer, 4, selectedOptions), true);
+  assert.equal(stagePass(oneContainer, 4, { ...selectedOptions, strictIsolation: true }), false);
   assert.equal(conflictViolations(oneContainer.partition).length, 9);
   assert.equal(hostRootSemanticCost(oneContainer.partition), 1);
 });
 
-test("the accepted Ark Core objective has one deterministic optimum", () => {
-  const feasible = candidates.filter((candidate) => stagePass(candidate, 4, acceptedOptions));
+test("the selected Ark Core objective has one deterministic optimum", () => {
+  const feasible = candidates.filter((candidate) => stagePass(candidate, 4, selectedOptions));
   const best = bestCandidates(feasible, "ark_core");
   assert.equal(best.length, 1);
   assert.equal(best[0].partition.blocks.length, 1);
@@ -81,7 +81,7 @@ test("the accepted Ark Core objective has one deterministic optimum", () => {
 });
 
 test("the strict-isolation objective recovers the former four-boundary answer", () => {
-  const feasible = candidates.filter((candidate) => stagePass(candidate, 4, acceptedOptions));
+  const feasible = candidates.filter((candidate) => stagePass(candidate, 4, selectedOptions));
   const strict = bestCandidates(feasible, "strict");
   assert.equal(strict.length, 1);
   assert.equal(strict[0].partition.blocks.length, 4);
@@ -92,8 +92,8 @@ test("the strict-isolation objective recovers the former four-boundary answer", 
   assert.ok(hostRootSemanticCost(strict[0].partition) > hostRootSemanticCost(bestCandidates(feasible, "ark_core")[0].partition));
 });
 
-test("availability sensitivity can reopen member recovery without changing the accepted baseline", () => {
-  const availabilityOptions = { ...acceptedOptions, requireGroupRecovery: false };
+test("availability sensitivity can reopen member recovery without changing the selected profile", () => {
+  const availabilityOptions = { ...selectedOptions, requireGroupRecovery: false };
   const feasible = candidates.filter((candidate) => stagePass(candidate, 4, availabilityOptions));
   const best = bestCandidates(feasible, "availability");
   assert.equal(best.length, 1);

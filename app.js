@@ -192,7 +192,7 @@ function renderArchitecture() {
     elements.resultFormula.textContent = "∅";
     elements.verdict.className = "verdict rejected";
     elements.verdict.textContent = state.topology === "one" && state.requireIsolation
-      ? "Rejected only by the optional strict-isolation edge. Clear it to restore the accepted Ark Core profile."
+      ? "Rejected only by the optional strict-isolation edge. Clear it to restore the selected Ark Core synthesis profile."
       : "No point satisfies the current constraint and knob combination.";
     return;
   }
@@ -214,14 +214,14 @@ function renderArchitecture() {
 
   const violations = conflictViolations(candidate.partition);
   const rootCost = hostRootSemanticCost(candidate.partition);
-  const acceptedShape = blocks.length === 1
+  const selectedShape = blocks.length === 1
     && candidate.policy.packaging === "shared_image"
     && candidate.policy.recovery === "group";
 
-  if (state.profile === "ark_core" && acceptedShape) {
+  if (state.profile === "ark_core" && selectedShape) {
     elements.resultTitle.textContent = "The host root stops orchestrating";
     elements.verdict.className = "verdict";
-    elements.verdict.textContent = `Accepted: one Ark Core image, one gVisor task, Engine PID 1 after bootstrap exec, four required III worker roles, dual Worker Manager paths, and one whole-appliance recovery fate. ${RUNTIME_PROOF.checkCount}/${RUNTIME_PROOF.checkCount} bounded runsc checks passed. Host-root semantic cost ${rootCost}; accepted residual exposure ${violations.length} cross-role edges.`;
+    elements.verdict.textContent = `Selected synthesis profile, represented by the governing formal release: one Ark Core image, one gVisor task, Engine PID 1 after bootstrap exec, four required III worker roles, dual Worker Manager paths, and one whole-appliance recovery fate. ${RUNTIME_PROOF.checkCount}/${RUNTIME_PROOF.checkCount} bounded runsc checks passed. Host-root semantic cost ${rootCost}; modeled residual exposure ${violations.length} cross-role edges.`;
   } else if (state.profile === "strict" && violations.length === 0) {
     elements.resultTitle.textContent = "Strict isolation restores four boundaries";
     elements.verdict.className = "verdict strict";
@@ -229,11 +229,11 @@ function renderArchitecture() {
   } else if (state.profile === "availability" && candidate.policy.recovery === "member") {
     elements.resultTitle.textContent = "Availability reopens member repair";
     elements.verdict.className = "verdict strict";
-    elements.verdict.textContent = `Availability sensitivity: ${blocks.length} isolated role boundaries permit member repair, increasing host-root task/orchestration cost to ${rootCost}. This is not the accepted baseline.`;
-  } else if (acceptedShape) {
+    elements.verdict.textContent = `Availability sensitivity: ${blocks.length} isolated role boundaries permit member repair, increasing host-root task/orchestration cost to ${rootCost}. This is not the selected synthesis profile and is non-authoritative.`;
+  } else if (selectedShape) {
     elements.resultTitle.textContent = "The minimum mechanism remains one Core";
     elements.verdict.className = "verdict";
-    elements.verdict.textContent = `Minimum-mechanism sensitivity: one shared Core keeps host-root cost at ${rootCost}, but its boot/writer policy differs from the accepted Ark Core profile.`;
+    elements.verdict.textContent = `Minimum-mechanism sensitivity: one shared Core keeps host-root cost at ${rootCost}, but its boot/writer policy differs from the selected Ark Core synthesis profile and is non-authoritative.`;
   } else if (violations.length === 0) {
     elements.resultTitle.textContent = "Every inherited isolation edge is preserved";
     elements.verdict.className = "verdict strict";
