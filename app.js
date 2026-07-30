@@ -164,14 +164,14 @@ function renderRoleCard(block) {
         <span>E + A + R + P + S · ONE GVISOR TASK</span>
         <strong>Ark Core Appliance</strong>
         <div class="worker-grid" aria-label="Required Ark Core workers">
-          <i>ENGINE <b>PID 1 after exec</b></i>
+          <i>ENGINE <b>required</b></i>
           <i>PERSISTENCE <b>required</b></i>
           <i>GATEWAY <b>A + R</b></i>
           <i>SUPERVISOR <b>required</b></i>
         </div>
-        <div class="runtime-paths" aria-label="Proven Ark Core runtime boundaries">
-          <span>IMAGE BOOTSTRAP → /run/iii → EXEC ENGINE</span>
-          <span>LOOPBACK WORKERS → GATEWAY-AUTHORIZED PRIVATE PORT</span>
+        <div class="runtime-paths" aria-label="Bounded embodiment provenance">
+          <span>PROVENANCE · HISTORICAL BOOTSTRAP / ENGINE PID PROFILE</span>
+          <span>PROVENANCE · HISTORICAL LISTENER PROFILE</span>
         </div>
         <small>one image · Core-only volume · per-task Ark-private network · no sibling forwarding</small>
       </div>`;

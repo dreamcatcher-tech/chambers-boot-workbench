@@ -35,10 +35,15 @@ test("runtime proof metadata stays exact", () => {
 
 test("public copy keeps embodiment provenance outside formal semantics", () => {
   const app = readFileSync(new URL("../app.js", import.meta.url), "utf8");
+  const index = readFileSync(new URL("../index.html", import.meta.url), "utf8");
   const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
   assert.doesNotMatch(app, /represented by the governing formal release:.*Engine PID 1/);
+  assert.doesNotMatch(app, /PID 1 after exec|EXEC ENGINE/);
+  assert.doesNotMatch(index, /WHY ONE APPLIANCE|ACCEPTED RISK/);
   assert.doesNotMatch(readme, /residual risk accepted by the governing formal release/);
   assert.match(app, /bounded embodiment provenance, not formal semantics/);
+  assert.match(index, /BOUNDED EMBODIMENT PROVENANCE/);
+  assert.match(index, /NOT A FORMAL PRODUCTION-RISK ACCEPTANCE/);
   assert.match(readme, /does \*\*not\*\* specify Engine PID placement/);
 });
 
