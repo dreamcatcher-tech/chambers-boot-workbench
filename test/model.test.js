@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 
 import {
   RUNTIME_PROOF,
@@ -30,6 +31,15 @@ test("runtime proof metadata stays exact", () => {
   assert.equal(RUNTIME_PROOF.iiiCommit, "56c4304aa368efdc925b69baaf6356cc723ba0ca");
   assert.equal(RUNTIME_PROOF.mechanisms.length, 5);
   assert.match(RUNTIME_PROOF.pending, /containerd\/CNI-plugin.*storage-driver.*deployment/);
+});
+
+test("public copy keeps embodiment provenance outside formal semantics", () => {
+  const app = readFileSync(new URL("../app.js", import.meta.url), "utf8");
+  const readme = readFileSync(new URL("../README.md", import.meta.url), "utf8");
+  assert.doesNotMatch(app, /represented by the governing formal release:.*Engine PID 1/);
+  assert.doesNotMatch(readme, /residual risk accepted by the governing formal release/);
+  assert.match(app, /bounded embodiment provenance, not formal semantics/);
+  assert.match(readme, /does \*\*not\*\* specify Engine PID placement/);
 });
 
 test("the v3 grammar is exhaustively enumerated", () => {

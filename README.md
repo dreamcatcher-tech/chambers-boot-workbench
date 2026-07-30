@@ -17,12 +17,12 @@ The deterministic browser model enumerates:
 - 29,952 bounded candidates in total.
 
 The V3 correction separates **problem invariants** from cross-role sandbox edges inherited from an earlier candidate.
-The profile later incorporated into the formal specification requires one atomic selector, bounded fallback, one upgrade fate, and one crash fate, then minimizes host-root task/orchestration semantics. It produces:
+The profile later incorporated into the formal specification requires one selected Ark Core appliance, fixed required-role startup, aggregate readiness, one upgrade fate, and one crash fate. It produces:
 
 ```text
 one Ark Core OCI image
 one gVisor task
-III Engine PID 1 + required Persistence / Gateway / Supervisor workers
+required Engine / Persistence / Gateway / Supervisor roles
 one whole-appliance recovery fate
 ```
 
@@ -32,12 +32,9 @@ or:
 |K| = 1, |Π| = 1, |Γ| = 1
 ```
 
-The strict-isolation sensitivity profile re-promotes the nine cross-role defense-in-depth edges and recovers the
-former four-boundary answer. That profile remains a non-authoritative counterfactual unless promoted through a later formal release.
+The formal release does **not** specify Engine PID placement, the concrete in-image restarter, dual Worker Manager listeners, or a quantified production-security acceptance. Those are downstream embodiment choices or bounded runtime/design provenance.
 
-The residual risk accepted by the governing formal release is explicit: container-root compromise inside the Ark Core can reach Persistence's
-mounted data. The compensating gain is a smaller, less semantic host-root ProcMan and a larger independently
-upgradable Core domain. Ordinary Chambers and sibling Ark scopes remain separately isolated.
+The strict-isolation sensitivity profile re-promotes the nine cross-role defense-in-depth edges and recovers the former four-boundary answer. That profile remains a non-authoritative counterfactual unless promoted through a later formal release. The workbench's nine-edge exposure score is sensitivity analysis, not a formal-release claim that a particular production risk was accepted. Ordinary Chambers and sibling Ark scopes remain separately isolated.
 
 ## Run checks
 

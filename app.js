@@ -221,7 +221,7 @@ function renderArchitecture() {
   if (state.profile === "ark_core" && selectedShape) {
     elements.resultTitle.textContent = "The host root stops orchestrating";
     elements.verdict.className = "verdict";
-    elements.verdict.textContent = `Selected synthesis profile, represented by the governing formal release: one Ark Core image, one gVisor task, Engine PID 1 after bootstrap exec, four required III worker roles, dual Worker Manager paths, and one whole-appliance recovery fate. ${RUNTIME_PROOF.checkCount}/${RUNTIME_PROOF.checkCount} bounded runsc checks passed. Host-root semantic cost ${rootCost}; modeled residual exposure ${violations.length} cross-role edges.`;
+    elements.verdict.textContent = `Selected historical synthesis profile. It aligns with the governing formal release on one Ark Core image, one gVisor task, the required Engine, Persistence, Gateway, and Supervisor roles, and one whole-appliance recovery fate. Engine PID placement and dual Worker Manager paths are bounded embodiment provenance, not formal semantics. ${RUNTIME_PROOF.checkCount}/${RUNTIME_PROOF.checkCount} bounded runsc checks passed. Host-root semantic cost ${rootCost}; workbench sensitivity score ${violations.length} cross-role edges.`;
   } else if (state.profile === "strict" && violations.length === 0) {
     elements.resultTitle.textContent = "Strict isolation restores four boundaries";
     elements.verdict.className = "verdict strict";
